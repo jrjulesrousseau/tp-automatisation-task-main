@@ -255,6 +255,7 @@ describe('Tests Selenium - Interface TaskFlow', () => {
   });
 });
 
+
 /* const { Builder, By, until } = require('selenium-webdriver');
 const chrome = require('selenium-webdriver/chrome');
 const { spawn } = require('child_process');
@@ -434,4 +435,6 @@ test('15 - Changement de statut → Terminée', async () => {
   await driver.findElement(By.css('[title="Changer le statut"]')).click();
   const task = await driver.findElement(By.css('.task-status'));
   expect(await task.getText()).toContain('Terminée');
-}); */
+}); 
+
+*/
