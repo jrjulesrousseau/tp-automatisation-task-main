@@ -325,7 +325,7 @@ test('1 - La page se charge correctement', async () => {
   const title = await driver.findElement(By.css('.section-title'));
   expect(title).toContain('Nouvelle Tâche');
 });
-*/
+
 
 test('2 - Le formulaire est présent', async () => {
   const form = await driver.findElement(By.id('taskForm'));
