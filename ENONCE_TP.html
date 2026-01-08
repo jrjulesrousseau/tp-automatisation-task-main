@@ -1,0 +1,324 @@
+
+		<head>
+			<style type="text/css" media="screen">
+				body,html{font-family:var(--markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", system-ui, "Ubuntu", "Droid Sans", sans-serif);font-size:var(--markdown-font-size,14px);padding:0 26px;line-height:var(--markdown-line-height,22px);word-wrap:break-word}body{padding-top:1em}h1,h2,h3,h4,h5,h6,ol,p,pre,ul{margin-top:0}h2,h3,h4,h5,h6{font-weight:400;margin-bottom:.2em}img{max-width:100%;max-height:100%}a{text-decoration:none}a:hover{text-decoration:underline}a:focus,input:focus,select:focus,textarea:focus{outline:1px solid -webkit-focus-ring-color;outline-offset:-1px}p{margin-bottom:.7em}ol,ul{margin-bottom:.7em}hr{border:0;height:2px;border-bottom:2px solid}h1{padding-bottom:.3em;line-height:1.2;border-bottom-width:1px;border-bottom-style:solid;font-weight:400}table{border-collapse:collapse}th{text-align:left;border-bottom:1px solid}td,th{padding:5px 10px}table>tbody>tr+tr>td{border-top:1px solid}blockquote{margin:0 7px 0 5px;padding:0 16px 0 10px;border-left-width:5px;border-left-style:solid}code{font-family:var(--vscode-editor-font-family, "SF Mono", Monaco, Menlo, Consolas, "Ubuntu Mono", "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace);font-size:1em;line-height:1.357em}body.wordWrap pre{white-space:pre-wrap}pre.hljs code>div,pre:not(.hljs){padding:16px;border-radius:3px;overflow:auto}pre code{color:var(--vscode-editor-foreground);tab-size:4}
+			</style>
+		</head>
+		<body>
+			<h1 id="tp--tests-e2e-conteneurisation-et-cicd">TP : Tests E2E, Conteneurisation et CI/CD</h1>
+<h2 id="contexte">Contexte</h2>
+<p>Vous intégrez une équipe DevOps en tant que testeur. L&#39;équipe de développement vous fournit une application web de gestion de tâches <strong>TaskFlow</strong> développée en Node.js/Express.</p>
+<p>L&#39;application dispose déjà de :</p>
+<ul>
+<li>Une API REST CRUD complète</li>
+<li>Une interface utilisateur moderne</li>
+<li>Des tests unitaires (Jest + Supertest)</li>
+</ul>
+<p><strong>Votre mission</strong> : Compléter la chaîne de qualité en ajoutant des tests E2E, conteneuriser l&#39;application et mettre en place une pipeline CI/CD.</p>
+<hr>
+<h2 id="objectifs">Objectifs</h2>
+<p>À l&#39;issue de ce TP, vous serez capable de :</p>
+<ul>
+<li>Écrire des tests End-to-End avec Selenium WebDriver</li>
+<li>Créer un Dockerfile multi-stage optimisé</li>
+<li>Concevoir une pipeline CI/CD avec GitHub Actions</li>
+<li>Intégrer des outils d&#39;analyse de sécurité (bonus)</li>
+</ul>
+<hr>
+<h2 id="prérequis">Prérequis</h2>
+<h3 id="techniques">Techniques</h3>
+<ul>
+<li>Node.js 18+ installé</li>
+<li>Docker Desktop installé</li>
+<li>Compte GitHub</li>
+<li>Compte Docker Hub</li>
+<li>Git configuré</li>
+</ul>
+<h3 id="connaissances">Connaissances</h3>
+<ul>
+<li>Bases de JavaScript</li>
+<li>Notions de conteneurisation Docker</li>
+<li>Compréhension des pipelines CI/CD</li>
+</ul>
+<hr>
+<h2 id="ressources-fournies">Ressources fournies</h2>
+<p>Vous recevez une archive <code>task-manager.zip</code> contenant :</p>
+<pre><code>task-manager/
+├── src/
+│   ├── app.js                 # Serveur Express
+│   ├── routes/tasks.js        # API REST
+│   └── models/taskStore.js    # Store en mémoire
+├── public/
+│   ├── index.html             # Interface utilisateur
+│   ├── css/style.css          # Styles
+│   └── js/app.js              # Logique frontend
+├── tests/
+│   ├── unit/                  # Tests unitaires (fournis)
+│   │   ├── taskStore.test.js
+│   │   └── api.test.js
+│   └── selenium/              # À COMPLÉTER
+│       └── .gitkeep
+├── package.json
+└── jest.config.js
+</code></pre>
+<h3 id="commandes-disponibles">Commandes disponibles</h3>
+<pre><code class="language-bash">npm install          # Installation des dépendances
+npm start            # Démarrer l&#39;application (port 3000)
+npm test             # Lancer les tests unitaires
+npm run test:selenium # Lancer les tests Selenium
+</code></pre>
+<h3 id="fonctionnalités-de-lapplication">Fonctionnalités de l&#39;application</h3>
+<table>
+<thead>
+<tr>
+<th>Fonctionnalité</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Créer une tâche</td>
+<td>Formulaire avec titre, description, priorité</td>
+</tr>
+<tr>
+<td>Lister les tâches</td>
+<td>Affichage de toutes les tâches</td>
+</tr>
+<tr>
+<td>Filtrer les tâches</td>
+<td>Par statut (En attente, En cours, Terminées)</td>
+</tr>
+<tr>
+<td>Modifier une tâche</td>
+<td>Via modal d&#39;édition</td>
+</tr>
+<tr>
+<td>Supprimer une tâche</td>
+<td>Avec confirmation</td>
+</tr>
+<tr>
+<td>Statistiques</td>
+<td>Compteurs en temps réel</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="api-rest">API REST</h3>
+<table>
+<thead>
+<tr>
+<th>Méthode</th>
+<th>Endpoint</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>GET</td>
+<td>/api/tasks</td>
+<td>Liste toutes les tâches</td>
+</tr>
+<tr>
+<td>GET</td>
+<td>/api/tasks/:id</td>
+<td>Récupère une tâche</td>
+</tr>
+<tr>
+<td>POST</td>
+<td>/api/tasks</td>
+<td>Crée une tâche</td>
+</tr>
+<tr>
+<td>PUT</td>
+<td>/api/tasks/:id</td>
+<td>Met à jour une tâche</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td>/api/tasks/:id</td>
+<td>Supprime une tâche</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="travail-demandé">Travail demandé</h2>
+<h3 id="partie-1--tests-selenium">Partie 1 : Tests Selenium</h3>
+<p>Créez le fichier <code>tests/selenium/tasks.selenium.test.js</code> contenant des tests E2E couvrant les scénarios suivants :</p>
+<ul>
+<li>Vous devez ecrire à minima plus de 19 tests e2e pertinents.</li>
+</ul>
+<h4 id="contraintes-techniques">Contraintes techniques</h4>
+<ul>
+<li>Utiliser Selenium WebDriver avec Chrome en mode headless</li>
+<li>Gérer correctement les waits (éviter les sleep fixes quand possible)</li>
+<li>Le serveur de test doit démarrer automatiquement sur un port dédié</li>
+<li>Nettoyer les données entre chaque test</li>
+</ul>
+<h3 id="partie-2--dockerfile">Partie 2 : Dockerfile</h3>
+<p>Créez un <code>Dockerfile</code> multi-stage respectant les bonnes pratiques.</p>
+<h4 id="21-exigences-fonctionnelles-15-points">2.1 Exigences fonctionnelles (15 points)</h4>
+<ul>
+<li><input disabled="" type="checkbox"> Utiliser Node.js 20 Alpine comme image de base</li>
+<li><input disabled="" type="checkbox"> Multi-stage build (minimum 2 stages)</li>
+<li><input disabled="" type="checkbox"> Exposer le port 3000</li>
+<li><input disabled="" type="checkbox"> L&#39;application doit démarrer correctement</li>
+</ul>
+<h4 id="22-exigences-de-sécurité-10-points">2.2 Exigences de sécurité (10 points)</h4>
+<ul>
+<li><input disabled="" type="checkbox"> Créer et utiliser un utilisateur non-root</li>
+<li><input disabled="" type="checkbox"> Définir un HEALTHCHECK</li>
+<li><input disabled="" type="checkbox"> Créer un fichier <code>.dockerignore</code> approprié</li>
+<li><input disabled="" type="checkbox"> Ne pas copier les fichiers de test dans l&#39;image finale</li>
+</ul>
+<h3 id="partie-3--pipeline-github-actions-35-points">Partie 3 : Pipeline GitHub Actions (35 points)</h3>
+<p>Créez le fichier <code>.github/workflows/ci-cd.yml</code> avec les jobs suivants :</p>
+<h4 id="31-job-test-unit">3.1 Job &quot;test-unit&quot;</h4>
+<h4 id="32-job-test-selenium">3.2 Job &quot;test-selenium&quot;</h4>
+<h4 id="33-job-build">3.3 Job &quot;build&quot;</h4>
+<h4 id="34-job-docker">3.4 Job &quot;docker&quot;</h4>
+<h4 id="secrets-à-configurer">Secrets à configurer</h4>
+<h2 id="bonus">Bonus</h2>
+<h3 id="bonus-1--sonarqube-7-points">Bonus 1 : SonarQube (7 points)</h3>
+<p>Ajoutez un job d&#39;analyse de qualité de code avec SonarCloud.</p>
+<h4 id="travail-demandé-1">Travail demandé</h4>
+<ul>
+<li><input disabled="" type="checkbox"> Créer un compte sur <a href="https://sonarcloud.io">SonarCloud</a></li>
+<li><input disabled="" type="checkbox"> Créer le fichier <code>sonar-project.properties</code></li>
+<li><input disabled="" type="checkbox"> Ajouter un job &quot;sonar&quot; dans la pipeline</li>
+<li><input disabled="" type="checkbox"> Configurer les secrets nécessaires</li>
+</ul>
+<h4 id="secrets-requis">Secrets requis</h4>
+<table>
+<thead>
+<tr>
+<th>Secret</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>SONAR_TOKEN</td>
+<td>Token SonarCloud</td>
+</tr>
+</tbody></table>
+<h4 id="exemple-de-configuration">Exemple de configuration</h4>
+<pre><code class="language-yaml">sonar:
+  name: SonarQube Analysis
+  runs-on: ubuntu-latest
+  needs: [test-unit]
+  steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: SonarCloud Scan
+      uses: SonarSource/sonarcloud-github-action@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+</code></pre>
+<h3 id="bonus-2--snyk">Bonus 2 : Snyk</h3>
+<p>Ajoutez un scan de vulnérabilités des dépendances avec Snyk.</p>
+<h4 id="travail-demandé-2">Travail demandé</h4>
+<ul>
+<li><input disabled="" type="checkbox"> Créer un compte sur <a href="https://snyk.io">Snyk</a></li>
+<li><input disabled="" type="checkbox"> Ajouter un job &quot;snyk&quot; dans la pipeline</li>
+<li><input disabled="" type="checkbox"> Scanner les dépendances Node.js</li>
+<li><input disabled="" type="checkbox"> Faire échouer le build si vulnérabilités critiques</li>
+</ul>
+<h4 id="secret-requis">Secret requis</h4>
+<table>
+<thead>
+<tr>
+<th>Secret</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>SNYK_TOKEN</td>
+<td>Token Snyk</td>
+</tr>
+</tbody></table>
+<h4 id="exemple-de-configuration-1">Exemple de configuration</h4>
+<pre><code class="language-yaml">snyk:
+  name: Snyk Security Scan
+  runs-on: ubuntu-latest
+  needs: [test-unit]
+  steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: &#39;20&#39;
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run Snyk to check for vulnerabilities
+      uses: snyk/actions/node@master
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      with:
+        args: --severity-threshold=high
+</code></pre>
+<h3 id="bonus-3--trivy-7-points">Bonus 3 : Trivy (7 points)</h3>
+<p>Ajoutez un scan de sécurité de l&#39;image Docker avec Trivy.</p>
+<h4 id="travail-demandé-3">Travail demandé</h4>
+<ul>
+<li><input disabled="" type="checkbox"> Ajouter un job &quot;trivy&quot; après le build Docker</li>
+<li><input disabled="" type="checkbox"> Scanner l&#39;image pour les vulnérabilités</li>
+<li><input disabled="" type="checkbox"> Générer un rapport au format SARIF</li>
+<li><input disabled="" type="checkbox"> Uploader le rapport dans l&#39;onglet Security de GitHub</li>
+</ul>
+<h4 id="exemple-de-configuration-2">Exemple de configuration</h4>
+<pre><code class="language-yaml">trivy:
+  name: Trivy Image Scan
+  runs-on: ubuntu-latest
+  needs: [docker]
+  if: github.event_name == &#39;push&#39; &amp;&amp; github.ref == &#39;refs/heads/main&#39;
+  steps:
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: ${{ secrets.DOCKERHUB_USERNAME }}/taskflow:${{ github.run_number }}
+        format: &#39;sarif&#39;
+        output: &#39;trivy-results.sarif&#39;
+        severity: &#39;CRITICAL,HIGH&#39;
+    
+    - name: Upload Trivy scan results
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: &#39;trivy-results.sarif&#39;
+</code></pre>
+<h2 id="livrables-attendus">Livrables attendus</h2>
+<ol>
+<li><p><strong>Repository GitHub</strong> contenant :</p>
+<ul>
+<li>Code source complet</li>
+<li>Tests Selenium (<code>tests/selenium/</code>)</li>
+<li>Dockerfile</li>
+<li>Pipeline CI/CD (<code>.github/workflows/ci-cd.yml</code>)</li>
+</ul>
+</li>
+<li><p><strong>Captures d&#39;écran</strong> :</p>
+<ul>
+<li>Pipeline GitHub Actions passée (tous les jobs verts)</li>
+<li>Image Docker Hub avec les tags</li>
+<li>(Bonus) Dashboard SonarCloud</li>
+<li>(Bonus) Rapport Snyk</li>
+<li>(Bonus) Résultats Trivy</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="modalités">Modalités</h2>
+<ul>
+<li><strong>Durée</strong> : 4 heures</li>
+<li><strong>Travail</strong> : Individuel</li>
+<li><strong>Rendu</strong> : Lien du repository GitHub + document de synthèse</li>
+</ul>
+<h2 id="conseils">Conseils</h2>
+<ol>
+<li><strong>Commencez par faire fonctionner l&#39;application en local</strong> avant d&#39;écrire les tests</li>
+<li><strong>Testez votre Dockerfile localement</strong> avant de l&#39;intégrer à la pipeline</li>
+<li><strong>Commitez régulièrement</strong> pour voir la pipeline s&#39;exécuter</li>
+<li><strong>Lisez les logs des jobs qui échouent</strong> - ils contiennent souvent la solution</li>
+</ol>
+<p><strong>Bon courage !</strong></p>
+
+		</body>

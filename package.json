@@ -1,0 +1,22 @@
+{
+  "name": "task-manager",
+  "version": "1.0.0",
+  "description": "Task Manager avec CRUD, tests unitaires et Selenium",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "test": "jest --testPathPattern=unit",
+    "test:selenium": "jest --testPathPattern=selenium --runInBand",
+    "test:all": "jest --runInBand"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3",
+    "selenium-webdriver": "^4.15.0"
+  }
+}
