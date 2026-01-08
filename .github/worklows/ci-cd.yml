@@ -10,9 +10,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: 20
+
       - run: npm ci
       - run: npm test
 
@@ -21,12 +24,20 @@ jobs:
     needs: test-unit
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npm ci
-      - run: sudo apt-get install -y chromium-browser
-      - run: npm run test:selenium
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Chromium
+        run: sudo apt-get update && sudo apt-get install -y chromium-browser
+
+      - name: Run Selenium tests
+        run: npm run test:selenium
 
   build:
     runs-on: ubuntu-latest
@@ -41,10 +52,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Login Docker Hub
-        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+      - name: Login to Docker Hub
+        run: |
+          echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login \
+            -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
-      - name: Build & Push
+      - name: Build and Push Image
         run: |
           docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/taskflow:${{ github.run_number }} .
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/taskflow:${{ github.run_number }}
