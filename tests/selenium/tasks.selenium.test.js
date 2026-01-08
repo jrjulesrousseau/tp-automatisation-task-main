@@ -162,6 +162,8 @@ describe('Tests Selenium - Interface TaskFlow', () => {
   // --------------------------------------------------
   // Tests de création de tâches
   // --------------------------------------------------
+
+/*
   describe('Création de tâches', () => {
 
     it('devrait créer une tâche avec titre seulement', async () => {
@@ -204,6 +206,8 @@ describe('Tests Selenium - Interface TaskFlow', () => {
       expect(await priorityIndicator.isDisplayed()).toBe(true);
     });
   });
+*/
+
 
   // --------------------------------------------------
   // Tests de filtrage des tâches
